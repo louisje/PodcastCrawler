@@ -21,18 +21,34 @@
 		 */
 		public function crawl() {
 			
+			global $cfgRssDir;
+			
 			$this -> checkConfiguration();
+			
+			$arrOrigEpisodes = Util :: loadEpisodesFromFile($cfgRssDir . "/" . self :: RSS_FILE);
 			
 			$arrEpisodes = array ();
 			$sHtml = Util :: sendHttpRequest(self :: BASE_URL . '/create/video/content/1');
 			$objSimpleDom = new simple_html_dom();
 			$objSimpleDom -> load($sHtml);
 			$arrDomItems = $objSimpleDom -> find('ul > li > a');
+			$iSkipped = 0;
 			foreach ($arrDomItems as $objDomItem) {
+				
+				$sEpisodePageLink = self :: BASE_URL . $objDomItem -> href;
+				foreach ($arrOrigEpisodes as $objOrigEpisode) {
+					if ($objOrigEpisode -> guid == $sEpisodePageLink) {
+						$arrEpisodes[] = $objOrigEpisode -> _;
+						//Util :: log("skip: $sEpisodePageLink", MODE_INFO);
+						$iSkipped++;
+						usleep(100000);
+						continue 2;
+					}
+				}
 				
 				$objEpisode = new Episode();
 				
-				$sHtml = Util :: sendHttpRequest(self :: BASE_URL . $objDomItem -> href);
+				$sHtml = Util :: sendHttpRequest($sEpisodePageLink);
 				$objSimpleDom = new simple_html_dom();
 				$objSimpleDom -> load($sHtml);
 				$objEpisode -> description = trim($objSimpleDom -> find('meta[name=description]', 0) -> content);
@@ -50,7 +66,7 @@
 				if (empty($arrMatches[1]))
 					throw new Exception('missing media url!');
 				$objEpisode -> url = $arrMatches[1];
-				$objEpisode -> guid = $arrMatches[1];
+				$objEpisode -> guid = $sEpisodePageLink;
 				$objEpisode -> type = 'video/x-flv';
 				$objEpisode -> length = Util :: getRemoteFileSize($objEpisode -> url);
 				$objEpisode -> duration = Util :: getVideoDuration($objEpisode -> url);
@@ -67,9 +83,14 @@
 				$objEpisode -> keywords = $objSimpleDom -> find('meta[name=keywords]', 0) -> content;
 				$objEpisode -> summary = trim($objSimpleDomIframe -> find('div.dv_playlist_art > span', 0) -> plaintext);
 				
+				Util :: log("update: " . $objEpisode -> title, MODE_INFO);
 				$arrEpisodes[] = $objEpisode -> _;
 				usleep(100000);
 			}
+			$iTotal = count($arrEpisodes);
+			$iNewAdded = $iTotal - $iSkipped;
+			Util :: log("total $iTotal episodes, $iNewAdded of them are new added");
+			
 			$objChannel = new Channel();
 			$sHtml = Util :: sendHttpRequest(self :: BASE_URL);
 			$objSimpleDom = new simple_html_dom();
@@ -87,10 +108,9 @@
 			/**
 			 * Generate RSS file
 			 */
-			global $cfgRssDir;
 			$objH2o = new H2o('podcast.tpl', array (
 				'cache' => false,
-				'searchpath' => './templates/')
+				'searchpath' => APP_ROOT . '/templates/')
 			);
 			$sFeed = $objH2o -> render(array (
 				"channel" => $objChannel -> _,

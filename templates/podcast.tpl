@@ -14,7 +14,6 @@
 	<itunes:email>{{ channel.owner.email }}</itunes:email>
 </itunes:owner>
 <itunes:image href="{{ channel.image }}" />
-<!--<itunes:explicit>clean</itunes:explicit>-->
 <!-- Not impletement in prototype
 <itunes:category text="Technology">
 <itunes:category text="Gadgets"/>
@@ -33,8 +32,7 @@
 <description>{{ episode.description }}</description>
 <itunes:duration>{% if episode.duration %}{{ episode.duration }}{% else %}6:00{% endif %}</itunes:duration>
 <itunes:keywords>{{ episode.keywords }}</itunes:keywords>
-<itunes:image>{{ episode.image }}</itunes:image>
-<!--<itunes:explicit>clean</itunes:explicit>-->
+<itunes:image href="{{ episode.image }}" />
 </item>
 {% endfor %}
 <!-- "item" example 

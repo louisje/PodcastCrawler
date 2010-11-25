@@ -11,9 +11,47 @@
 		 * @return       array of object Episode
 		 */
 		static function loadEpisodesFromFile($sRss) {
-			if (!file_exists($sRss))
+			
+			if (!file_exists($sRss)) {
+				self :: log("file $sRss does not exists!", MODE_WARNING);
 				return array ();
-			// Qoo
+			}
+			$objXml = simplexml_load_file($sRss);
+			if (empty($objXml)) {
+				self :: log("can not parse $sRss !", MODE_WARNING);
+				return array ();
+			}
+			$arrXmlItems = $objXml -> channel -> item;
+			
+			$arrEpisodes = array ();
+			
+			$iCount = count($arrXmlItems);
+			//self :: log("item_count: $iCount", MODE_INFO);
+			for ($i = 0; $i < $iCount; $i++) {
+				
+				$objItem = $arrXmlItems[$i];
+				$objItune = $objItem -> children("http://www.itunes.com/dtds/podcast-1.0.dtd");
+				
+				$objEpisode = new Episode();
+				$objEpisode -> title = (string)$objItem -> title;
+				$objEpisode -> author = (string)$objItune -> author;
+				$objEpisode -> subtitle = (string)$objItune -> subtitle;
+				$objEpisode -> summary = (string)$objItune -> summary;
+				$arrAttributes = $objItem -> enclosure -> attributes();
+				$objEpisode -> url = $arrAttributes['url'];
+				$objEpisode -> length = $arrAttributes['length'];
+				$objEpisode -> type = $arrAttributes['type'];
+				$objEpisode -> guid = (string)$objItem -> guid;
+				$objEpisode -> pubDate = (string)$objItem -> pubDate;
+				$objEpisode -> description = (string)$objItem -> description;
+				$objEpisode -> duration = (string)$objItune -> duration;
+				$objEpisode -> keywords = (string)$objItune -> keywords;
+				$arrAttributes = $objItune -> image -> attributes();
+				$objEpisode -> image = $arrAttributes['href'];
+				
+				$arrEpisodes[] = $objEpisode;
+			}
+			return $arrEpisodes;
 		}
 		
 		/**
@@ -83,7 +121,7 @@
 			global $cfgFFProbePath;
 			
 			$sCommand = "$cfgFFProbePath " . escapeshellarg($sUrl) . " 2>&1";
-			Util :: log($sCommand, MODE_INFO);
+			//Util :: log($sCommand, MODE_INFO);
 			unset($arrOutputs);
 			exec($sCommand, $arrOutputs);
 			foreach ($arrOutputs as $sOutput) {
@@ -188,7 +226,7 @@
 			if (($rCurl = curl_init()) === FALSE)
 				throw new Exception("Can not initialize cURL!");
 			
-			self :: log("postUrl: $sRequestUrl", MODE_INFO);
+			//self :: log("postUrl: $sRequestUrl", MODE_INFO);
 			
 			curl_setopt($rCurl, constant('CURLOPT_URL'), $sRequestUrl);
 			curl_setopt($rCurl, constant('CURLOPT_RETURNTRANSFER'), TRUE);
@@ -221,7 +259,7 @@
 			//self :: log(print_r($arrHeader, TRUE));
 			
 			$arrInfo = curl_getinfo($rCurl);
-			self :: log(" + http_code: {$arrInfo['http_code']}, total_time: {$arrInfo['total_time']}, speed_download: {$arrInfo['speed_download']}", MODE_DEBUG);
+			//self :: log(" + http_code: {$arrInfo['http_code']}, total_time: {$arrInfo['total_time']}, speed_download: {$arrInfo['speed_download']}", MODE_DEBUG);
 			
 			return $sBody;
 		}

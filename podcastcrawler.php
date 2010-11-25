@@ -2,14 +2,22 @@
 	
 	require_once dirname(__FILE__) . "/common.php";
 	
+	Util :: log("podcastcrawler started", MODE_INFO);
+	
 	/**
 	 * Create lock file
 	 */
 	$sPidFile = $cfgLogDir . '/podcastcrawler.pid';
-	if (file_exists($sPidFile))
-		die("\nERROR: another instance is running!\n\n");
-	if (!file_put_contents($sPidFile, getmypid()))
-		die("\nERROR: fail to create lock file!\n\n");
+	if (file_exists($sPidFile)) {
+		$sErrorMessage = "another instance is running! pid=" . file_get_contents($sPidFile);
+		Util :: log($sErrorMessage, MODE_ERROR);
+		die("\nERROR: $sErrorMessage\n\n");
+	}
+	if (!file_put_contents($sPidFile, getmypid())) {
+		$sErrorMessage = "fail to create lock file!";
+		Util :: log($sErrorMessage, MODE_ERROR);
+		die("\nERROR: $sErrorMessage\n\n");
+	}
 	
 	try {
 		$objCrawler = new OneAppleCrawler();
@@ -25,6 +33,11 @@
 	/**
 	 * Remove lock file
 	 */
-	if (!unlink($sPidFile))
-		die("\nWARNING: fail to remove lock file, you may need to remove it manually.\n\n");
+	if (!unlink($sPidFile)) {
+		$sErrorMessage = "fail to remove lock file, you may need to remove it manually";
+		Util :: log($sErrorMessage, MODE_WARNING);
+		die("\nWARNING: $sErrorMessage\n\n");
+	}
+	
+	Util :: log("podcastcrawler ended", MODE_INFO);
 	
