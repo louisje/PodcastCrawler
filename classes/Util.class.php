@@ -5,6 +5,17 @@
 		static public $arrHttpHeader = array ();
 		
 		/**
+		 * Check System Configuration
+		 */
+		static public function checkConfiguration() {
+			
+			global $cfgFFProbePath;
+			
+			if (!is_executable($cfgFFProbePath))
+				throw new Exception('missing FFProbe!');
+		}
+		
+		/**
 		 * Clone RSS <item>
 		 *
 		 * @param  $objXmlTo   item clone to
@@ -20,8 +31,8 @@
 			$objXmlEnclosure -> addAttribute('length', $arrEnclosureAttributes['length']);
 			$objXmlEnclosure -> addAttribute('type', $arrEnclosureAttributes['type']);
 			$objXmlTo -> addChild('pubDate', (string)$objXmlFrom -> pubDate);
-			$objXmlTo -> addChild('link', (string)$objXmlFrom -> link);
-			$objXmlTo -> addChild('guid', (string)$objXmlFrom -> guid);
+			$objXmlTo -> addChild('link', htmlspecialchars((string)$objXmlFrom -> link));
+			$objXmlTo -> addChild('guid', htmlspecialchars((string)$objXmlFrom -> guid));
 		}
 		/**
 		 * Compare Two Item's pubDate
