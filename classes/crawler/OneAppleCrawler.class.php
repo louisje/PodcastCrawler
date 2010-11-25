@@ -30,9 +30,10 @@
 			$objXmlOriginalRss = NULL;
 			if (file_exists($sOriginalRssFile)) {
 				
-				if (($objXmlOriginalRss = simplexml_load_file($sOriginalRssFile)) == FALSE)
-					Util :: log('Can not parse original RSS file', MODE_WARNING);
-				Util :: log("Load RSS from $sOriginalRssFile", MODE_INFO);
+				if (($objXmlOriginalRss = simplexml_load_file($sOriginalRssFile)) === FALSE)
+					Util :: log("Can not parse original RSS file $sOriginalRssFile", MODE_WARNING);
+				else
+					Util :: log("Load RSS from $sOriginalRssFile", MODE_INFO);
 			}
 			else
 				Util :: log("Original RSS file $sOriginalRssFile does not exists", MODE_WARNING);
@@ -59,23 +60,32 @@
 			foreach ($arrDomItems as $objDomItem) {
 				
 				$sEpisodePageLink = self :: BASE_URL . $objDomItem -> href;
-				/*
-				foreach ($objXmlOriginalRss -> xpath('/rss/channel/item') as $objXmlOriginalItem) {
-					if (((string)$objXmlOriginalItem -> guid) == $sEpisodePageLink) {
-						
-						$sXml = "";
-						foreach ($objXmlOriginalItem -> children() as $objXmlChild)
-							$sXml .= $objXmlChild -> asXML();
-						$objXmlChannel -> addChild('item', $sXml);
-						$iSkipped++;
-						usleep(100000);
-						continue 2;
-					}
-				}
-				*/
 				
 				$objXmlItem = $objXmlChannel -> addChild('item');
 				
+				if ($objXmlOriginalRss) {
+					
+					foreach ($objXmlOriginalRss -> xpath('/rss/channel/item') as $objXmlOriginalItem) {
+						
+						if (((string)$objXmlOriginalItem -> guid) == $sEpisodePageLink) {
+							
+							$objXmlItem -> addChild('title', (string)$objXmlOriginalItem -> title);
+							$objXmlItem -> addChild('description', (string)$objXmlOriginalItem -> description);
+							$arrEnclosureAttributes = $objXmlOriginalItem -> enclosure -> attributes();
+							$objXmlEnclosure = $objXmlItem -> addChild('enclosure');
+							$objXmlEnclosure -> addAttribute('url', $arrEnclosureAttributes['url']);
+							$objXmlEnclosure -> addAttribute('length', $arrEnclosureAttributes['length']);
+							$objXmlEnclosure -> addAttribute('type', $arrEnclosureAttributes['type']);
+							$objXmlItem -> addChild('pubDate', (string)$objXmlOriginalItem -> pubDate);
+							$objXmlItem -> addChild('link', (string)$objXmlOriginalItem -> link);
+							$objXmlItem -> addChild('guid', (string)$objXmlOriginalItem -> guid);
+							
+							$iSkipped++;
+							usleep(100000);
+							continue 2;
+						}
+					}
+				}
 				$objSimpleDom = file_get_html($sEpisodePageLink);
 				$sIframeUrl = $objSimpleDom -> find('iframe#test', 0) -> src;
 				if (empty($sIframeUrl))
@@ -84,7 +94,6 @@
 				
 				$objXmlItem -> addChild('title', $objSimpleDom -> find('title', 0) -> plaintext);
 				$objXmlItem -> addChild('description', trim($objSimpleDomIframe -> find('div.dv_playlist_art > span', 0) -> plaintext));
-				//$objXmlItem -> addChild('author', $objSimpleDom -> find('meta[name=author]', 0) -> content);
 				
 				/**
 				 * Enclosure Tag
