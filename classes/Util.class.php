@@ -5,6 +5,40 @@
 		static public $arrHttpHeader = array ();
 		
 		/**
+		 * Clone RSS <item>
+		 *
+		 * @param  $objXmlTo   item clone to
+		 * @param  $objXmlFrom item clone from
+		 */
+		static public function cloneRSSItem(SimpleXmlElement $objXmlTo, SimpleXmlElement $objXmlFrom) {
+			
+			$objXmlTo -> addChild('title', (string)$objXmlFrom -> title);
+			$objXmlTo -> addChild('description', (string)$objXmlFrom -> description);
+			$arrEnclosureAttributes = $objXmlFrom -> enclosure -> attributes();
+			$objXmlEnclosure = $objXmlTo -> addChild('enclosure');
+			$objXmlEnclosure -> addAttribute('url', $arrEnclosureAttributes['url']);
+			$objXmlEnclosure -> addAttribute('length', $arrEnclosureAttributes['length']);
+			$objXmlEnclosure -> addAttribute('type', $arrEnclosureAttributes['type']);
+			$objXmlTo -> addChild('pubDate', (string)$objXmlFrom -> pubDate);
+			$objXmlTo -> addChild('link', (string)$objXmlFrom -> link);
+			$objXmlTo -> addChild('guid', (string)$objXmlFrom -> guid);
+		}
+		/**
+		 * Compare Two Item's pubDate
+		 *
+		 * @param  $objXmlItamA first item
+		 * @param  $objXmlItemB second item
+		 * @return negtive, zero, positive if the second item is less, equal, greater than the first
+		 */
+		static public function compareItemPubDate(SimpleXmlElement $objXmlItemA, SimpleXmlElement $objXmlItemB) {
+			
+			$iTimeA = strtotime($objXmlItemA -> pubDate);
+			$iTimeB = strtotime($objXmlItemB -> pubDate);
+			
+			return $iTimeB - $iTimeA;
+		}
+		
+		/**
 		 * Get Remote File Size
 		 *
 		 * @param  $sURl remote file url
@@ -154,6 +188,7 @@
 					throw new Exception("Can not write log file!");
 			}
 		}
+		
 		/**
 		 * Send HTTP request to target URL use POST method and get response
 		 *

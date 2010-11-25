@@ -56,12 +56,14 @@
 			
 			$objSimpleDom = file_get_html(self :: BASE_URL . '/create/video/content/1');
 			$arrDomItems = $objSimpleDom -> find('ul > li > a');
+			$arrDomItems = array_reverse($arrDomItems);
 			$iSkipped = 0;
-			foreach ($arrDomItems as $objDomItem) {
+			$arrXmlItems = array ();
+			for ($i = 0 ; $i < count($arrDomItems); $i++) {
 				
-				$sEpisodePageLink = self :: BASE_URL . $objDomItem -> href;
+				$sEpisodePageLink = self :: BASE_URL . $arrDomItems[$i] -> href;
 				
-				$objXmlItem = $objXmlChannel -> addChild('item');
+				$objXmlItem = new SimpleXmlElement('<item/>');
 				
 				if ($objXmlOriginalRss) {
 					
@@ -69,19 +71,11 @@
 						
 						if (((string)$objXmlOriginalItem -> guid) == $sEpisodePageLink) {
 							
-							$objXmlItem -> addChild('title', (string)$objXmlOriginalItem -> title);
-							$objXmlItem -> addChild('description', (string)$objXmlOriginalItem -> description);
-							$arrEnclosureAttributes = $objXmlOriginalItem -> enclosure -> attributes();
-							$objXmlEnclosure = $objXmlItem -> addChild('enclosure');
-							$objXmlEnclosure -> addAttribute('url', $arrEnclosureAttributes['url']);
-							$objXmlEnclosure -> addAttribute('length', $arrEnclosureAttributes['length']);
-							$objXmlEnclosure -> addAttribute('type', $arrEnclosureAttributes['type']);
-							$objXmlItem -> addChild('pubDate', (string)$objXmlOriginalItem -> pubDate);
-							$objXmlItem -> addChild('link', (string)$objXmlOriginalItem -> link);
-							$objXmlItem -> addChild('guid', (string)$objXmlOriginalItem -> guid);
+							Util :: cloneRssItem($objXmlItem, $objXmlOriginalItem);
 							
+							$arrXmlItems[] = $objXmlItem;
 							$iSkipped++;
-							usleep(100000);
+							sleep(1);
 							continue 2;
 						}
 					}
@@ -93,7 +87,7 @@
 				$objSimpleDomIframe = file_get_html(self :: BASE_URL . $sIframeUrl);
 				
 				$objXmlItem -> addChild('title', $objSimpleDom -> find('title', 0) -> plaintext);
-				$objXmlItem -> addChild('description', trim($objSimpleDomIframe -> find('div.dv_playlist_art > span', 0) -> plaintext));
+				$objXmlItem -> addChild('description', trim($objSimpleDom -> find('meta[name=description]', 0) -> content));
 				
 				/**
 				 * Enclosure Tag
@@ -112,9 +106,14 @@
 				$objXmlItem -> addChild('link', $sEpisodePageLink);
 				$objXmlItem -> addChild('guid', $sEpisodePageLink);
 				
+				$arrXmlItems[] = $objXmlItem;
 				Util :: log("update: " . $objXmlItem -> title, MODE_INFO);
-				usleep(100000);
+				sleep(1);
 			}
+			usort($arrXmlItems, "Util::compareItemPubDate");
+			for ($i = 0; $i < count($arrXmlItems); $i++)
+				Util :: cloneRssItem($objXmlChannel -> addChild('item'), $arrXmlItems[$i]);
+			
 			$iTotal = count($objXmlChannel -> item);
 			$iNewAdded = $iTotal - $iSkipped;
 			Util :: log("total $iTotal episodes, $iNewAdded of them are new added");
