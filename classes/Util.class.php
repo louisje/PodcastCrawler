@@ -5,56 +5,6 @@
 		static public $arrHttpHeader = array ();
 		
 		/**
-		 * Load Episodes from File
-		 *
-		 * @param  $sRss RSS file
-		 * @return       array of object Episode
-		 */
-		static function loadEpisodesFromFile($sRss) {
-			
-			if (!file_exists($sRss)) {
-				self :: log("file $sRss does not exists!", MODE_WARNING);
-				return array ();
-			}
-			$objXml = simplexml_load_file($sRss);
-			if (empty($objXml)) {
-				self :: log("can not parse $sRss !", MODE_WARNING);
-				return array ();
-			}
-			$arrXmlItems = $objXml -> channel -> item;
-			
-			$arrEpisodes = array ();
-			
-			$iCount = count($arrXmlItems);
-			//self :: log("item_count: $iCount", MODE_INFO);
-			for ($i = 0; $i < $iCount; $i++) {
-				
-				$objItem = $arrXmlItems[$i];
-				$objItune = $objItem -> children("http://www.itunes.com/dtds/podcast-1.0.dtd");
-				
-				$objEpisode = new Episode();
-				$objEpisode -> title = (string)$objItem -> title;
-				$objEpisode -> author = (string)$objItune -> author;
-				$objEpisode -> subtitle = (string)$objItune -> subtitle;
-				$objEpisode -> summary = (string)$objItune -> summary;
-				$arrAttributes = $objItem -> enclosure -> attributes();
-				$objEpisode -> url = $arrAttributes['url'];
-				$objEpisode -> length = $arrAttributes['length'];
-				$objEpisode -> type = $arrAttributes['type'];
-				$objEpisode -> guid = (string)$objItem -> guid;
-				$objEpisode -> pubDate = (string)$objItem -> pubDate;
-				$objEpisode -> description = (string)$objItem -> description;
-				$objEpisode -> duration = (string)$objItune -> duration;
-				$objEpisode -> keywords = (string)$objItune -> keywords;
-				$arrAttributes = $objItune -> image -> attributes();
-				$objEpisode -> image = $arrAttributes['href'];
-				
-				$arrEpisodes[] = $objEpisode;
-			}
-			return $arrEpisodes;
-		}
-		
-		/**
 		 * Get Remote File Size
 		 *
 		 * @param  $sURl remote file url
@@ -84,26 +34,24 @@
 				list ($sName, $sValue) = preg_split("/: /", $sLine, 2);
 				$arrHeader[$sName] = $sValue;
 			}
+			self :: $arrHttpHeader = $arrHeader;
 			if (isset($arrHeader['Content-Length'])) {
 				$iRedirections = 0;
 				return $arrHeader['Content-Length'];
 			}
 			else if (isset($arrHeader['Location'])) {
 				$iRedirections += 1;
-				if ($iRedirections <= $iMaxRedirection)
-				{
+				if ($iRedirections <= $iMaxRedirection) {
 					self :: log("Follow: $iRedirections", MDOE_DEBUG);
 					return self :: getRemoteFileSize($arrHeader['Location']);
 				}
-				else
-				{
+				else {
 					self :: log("Exceed redirection limit!", MODE_WARNING);
 					$iRedirections = 0;
 					return 0;
 				}
 			}
-			else
-			{
+			else {
 				self :: log("No content-length.", MODE_WARNING);
 				$iRedirections = 0;
 				return 0;
@@ -126,14 +74,17 @@
 			exec($sCommand, $arrOutputs);
 			foreach ($arrOutputs as $sOutput) {
 				//Util :: log(" + $sOutput", MODE_DEBUG);
-				if (preg_match('/^  Duration: ([0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9][0-9]),/', $sOutput, $arrMatches))
+				if (preg_match('/^  Duration: ([0-9][0-9]:[0-9][0-9]:[0-9][0-9])\.[0-9][0-9],/', $sOutput, $arrMatches))
 					$sDuration = $arrMatches[1];
 			}
-			if (isset($sDuration))
+			if (isset($sDuration)) {
+				$sDuration = preg_replace('/^(00:)+/', '', $sDuration);
 				return $sDuration;
+			}
 			else
 				return NULL;
 		}
+		
 		/**
 		 * Like basename(), but support UTF-8
 		 *

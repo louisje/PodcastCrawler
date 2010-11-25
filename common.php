@@ -31,7 +31,5 @@
 	require_once APP_ROOT . '/libs/h2o-php/h2o.php';
 	require_once APP_ROOT . '/libs/simple-html-dom/simple_html_dom.php';
 	require_once APP_ROOT . '/classes/Util.class.php';
-	require_once APP_ROOT . '/classes/Channel.class.php';
-	require_once APP_ROOT . '/classes/Episode.class.php';
 	require_once APP_ROOT . '/classes/crawler/OneAppleCrawler.class.php';
 	

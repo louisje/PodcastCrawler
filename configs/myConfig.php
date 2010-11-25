@@ -8,6 +8,7 @@
 	 * Where to put generated RSS files
 	 */
 	$cfgRssDir = APP_ROOT . '/feeds';
+	$cfgRssUrl = 'http://202.5.224.193/louis/PodcastCrawler/feeds';
 	
 	/**
 	 * Debug & Log

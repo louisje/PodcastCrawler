@@ -2,7 +2,7 @@
 	
 	require_once dirname(__FILE__) . "/common.php";
 	
-	Util :: log("podcastcrawler started", MODE_INFO);
+	Util :: log("podcastcrawler started ...", MODE_INFO);
 	
 	/**
 	 * Create lock file
@@ -11,7 +11,7 @@
 	if (file_exists($sPidFile)) {
 		$sErrorMessage = "another instance is running! pid=" . file_get_contents($sPidFile);
 		Util :: log($sErrorMessage, MODE_ERROR);
-		die("\nERROR: $sErrorMessage\n\n");
+		die("\nERROR: $sErrorMessage\n\nYou may need to make sure all podcastcrawler pcorcesses are stoped, then remove file logs/podcastcrawler.pid manually.\n\n");
 	}
 	if (!file_put_contents($sPidFile, getmypid())) {
 		$sErrorMessage = "fail to create lock file!";
@@ -39,5 +39,5 @@
 		die("\nWARNING: $sErrorMessage\n\n");
 	}
 	
-	Util :: log("podcastcrawler ended", MODE_INFO);
+	Util :: log("... podcastcrawler ended", MODE_INFO);
 	

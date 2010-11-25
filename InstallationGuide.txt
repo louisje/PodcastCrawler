@@ -1,1 +1,8 @@
-ffmpeg
+Required Packages
+
+* ffmpeg 0.61
+
+
+Trouble Shooting
+
+* Another instance is running
