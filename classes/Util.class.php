@@ -24,15 +24,21 @@
 		static public function cloneRSSItem(SimpleXmlElement $objXmlTo, SimpleXmlElement $objXmlFrom) {
 			
 			$objXmlTo -> addChild('title', (string)$objXmlFrom -> title);
-			$objXmlTo -> addChild('description', (string)$objXmlFrom -> description);
-			$arrEnclosureAttributes = $objXmlFrom -> enclosure -> attributes();
-			$objXmlEnclosure = $objXmlTo -> addChild('enclosure');
-			$objXmlEnclosure -> addAttribute('url', $arrEnclosureAttributes['url']);
-			$objXmlEnclosure -> addAttribute('length', $arrEnclosureAttributes['length']);
-			$objXmlEnclosure -> addAttribute('type', $arrEnclosureAttributes['type']);
-			$objXmlTo -> addChild('pubDate', (string)$objXmlFrom -> pubDate);
-			$objXmlTo -> addChild('link', htmlspecialchars((string)$objXmlFrom -> link));
-			$objXmlTo -> addChild('guid', htmlspecialchars((string)$objXmlFrom -> guid));
+			if (count($objXmlFrom -> description))
+				$objXmlTo -> addChild('description', (string)$objXmlFrom -> description);
+			if (count($objXmlFrom -> enclosure)) {
+				$arrEnclosureAttributes = $objXmlFrom -> enclosure -> attributes();
+				$objXmlEnclosure = $objXmlTo -> addChild('enclosure');
+				$objXmlEnclosure -> addAttribute('url', $arrEnclosureAttributes['url']);
+				$objXmlEnclosure -> addAttribute('length', $arrEnclosureAttributes['length']);
+				$objXmlEnclosure -> addAttribute('type', $arrEnclosureAttributes['type']);
+			}
+			if (count($objXmlFrom -> pubDate))
+				$objXmlTo -> addChild('pubDate', (string)$objXmlFrom -> pubDate);
+			if (count($objXmlFrom -> link))
+				$objXmlTo -> addChild('link', htmlspecialchars((string)$objXmlFrom -> link));
+			if (count($objXmlFrom -> guid))
+				$objXmlTo -> addChild('guid', htmlspecialchars((string)$objXmlFrom -> guid));
 		}
 		/**
 		 * Compare Two Item's pubDate

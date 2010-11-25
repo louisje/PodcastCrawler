@@ -32,4 +32,6 @@
 	require_once APP_ROOT . '/libs/simple-html-dom/simple_html_dom.php';
 	require_once APP_ROOT . '/classes/Util.class.php';
 	require_once APP_ROOT . '/classes/crawler/OneAppleCrawler.class.php';
+	require_once APP_ROOT . '/classes/crawler/IpavoCrawler.class.php';
+	require_once APP_ROOT . '/classes/crawler/IwantCrawler.class.php';
 	
