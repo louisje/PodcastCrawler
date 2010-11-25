@@ -16,6 +16,8 @@
 			'pubDate' => '',
 			'duration' => '',
 			'keywords' => '',
+			'description' => '',
+			'image' => '',
 		);
 		
 		public function __get($sName) {

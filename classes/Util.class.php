@@ -5,6 +5,18 @@
 		static public $arrHttpHeader = array ();
 		
 		/**
+		 * Load Episodes from File
+		 *
+		 * @param  $sRss RSS file
+		 * @return       array of object Episode
+		 */
+		static function loadEpisodesFromFile($sRss) {
+			if (!file_exists($sRss))
+				return array ();
+			// Qoo
+		}
+		
+		/**
 		 * Get Remote File Size
 		 *
 		 * @param  $sURl remote file url
@@ -75,7 +87,7 @@
 			unset($arrOutputs);
 			exec($sCommand, $arrOutputs);
 			foreach ($arrOutputs as $sOutput) {
-				Util :: log(" + $sOutput", MODE_DEBUG);
+				//Util :: log(" + $sOutput", MODE_DEBUG);
 				if (preg_match('/^  Duration: ([0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9][0-9]),/', $sOutput, $arrMatches))
 					$sDuration = $arrMatches[1];
 			}

@@ -30,8 +30,10 @@
 <enclosure url="{{ episode.media.url }}" length="{% if episode.media.length %}{{ episode.media.length }}{% else %}10000000{% endif %}" type="{{episode.media.type}}" />
 <guid>{{ episode.guid }}</guid>
 <pubDate>{{ episode.pubDate }}</pubDate>
+<description>{{ episode.description }}</description>
 <itunes:duration>{% if episode.duration %}{{ episode.duration }}{% else %}6:00{% endif %}</itunes:duration>
 <itunes:keywords>{{ episode.keywords }}</itunes:keywords>
+<itunes:image>{{ episode.image }}</itunes:image>
 <!--<itunes:explicit>clean</itunes:explicit>-->
 </item>
 {% endfor %}
