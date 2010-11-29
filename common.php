@@ -34,4 +34,5 @@
 	require_once APP_ROOT . '/classes/crawler/OneAppleCrawler.class.php';
 	require_once APP_ROOT . '/classes/crawler/IpavoCrawler.class.php';
 	require_once APP_ROOT . '/classes/crawler/IwantCrawler.class.php';
+	require_once APP_ROOT . '/classes/crawler/EpaCrawler.class.php';
 	
