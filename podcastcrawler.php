@@ -22,6 +22,9 @@
 	try {
 		$objCrawler = new OneAppleCrawler();
 		$objCrawler -> crawl();
+		
+		$objCrawler = new MetacafeCrawler();
+		$objCrawler -> crawl();
 	}
 	catch (Exception $e) {
 		Util :: log ("Exception: " . $e -> getMessage(), MODE_ERROR);

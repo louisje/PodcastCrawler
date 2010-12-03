@@ -23,9 +23,9 @@
 		 */
 		static public function cloneRSSItem(SimpleXmlElement $objXmlTo, SimpleXmlElement $objXmlFrom) {
 			
-			$objXmlTo -> addChild('title', (string)$objXmlFrom -> title);
+			$objXmlTo -> addChild('title', htmlspecialchars((string)$objXmlFrom -> title));
 			if (count($objXmlFrom -> description))
-				$objXmlTo -> addChild('description', (string)$objXmlFrom -> description);
+				$objXmlTo -> addChild('description', htmlspecialchars((string)$objXmlFrom -> description));
 			if (count($objXmlFrom -> enclosure)) {
 				$arrEnclosureAttributes = $objXmlFrom -> enclosure -> attributes();
 				$objXmlEnclosure = $objXmlTo -> addChild('enclosure');
