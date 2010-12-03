@@ -40,10 +40,23 @@
 			if (count($objXmlFrom -> guid))
 				$objXmlTo -> addChild('guid', htmlspecialchars((string)$objXmlFrom -> guid));
 		}
+		
+		/**
+		 * Compare Two Item's Guid
+		 *
+		 * @param  $objXmlItemA first item
+		 * @param  $objXmlItemB second item
+		 * @return negtive, zero, positive if the second item is less, equal, greater than the first
+		 */
+		static public function compareItemGuid(SimpleXmlElement $objXmlItemA, SimpleXmlElement $objXmlItemB) {
+			
+			return strcmp($objXmlItemA -> guid, $objXmlItemB -> guid);
+		}
+		
 		/**
 		 * Compare Two Item's pubDate
 		 *
-		 * @param  $objXmlItamA first item
+		 * @param  $objXmlItemA first item
 		 * @param  $objXmlItemB second item
 		 * @return negtive, zero, positive if the second item is less, equal, greater than the first
 		 */
