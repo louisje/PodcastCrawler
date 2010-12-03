@@ -37,4 +37,5 @@
 	require_once APP_ROOT . '/classes/crawler/EpaCrawler.class.php';
 	require_once APP_ROOT . '/classes/crawler/BioCrawler.class.php';
 	require_once APP_ROOT . '/classes/crawler/Bio2Crawler.class.php';
+	require_once APP_ROOT . '/classes/crawler/JylinCrawler.class.php';
 	
