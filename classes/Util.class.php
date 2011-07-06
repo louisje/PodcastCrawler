@@ -94,7 +94,7 @@
 			array_shift($arrHeaderLines);
 			$arrHeader = array ();
 			foreach ($arrHeaderLines as $sLine) {
-				list ($sName, $sValue) = preg_split("/: /", $sLine, 2);
+				@list ($sName, $sValue) = preg_split("/: /", $sLine, 2);
 				$arrHeader[$sName] = $sValue;
 			}
 			self :: $arrHttpHeader = $arrHeader;
@@ -250,6 +250,7 @@
 			curl_setopt($rCurl, constant('CURLOPT_HEADER'), TRUE);
 			curl_setopt($rCurl, constant('CURLOPT_ENCODING'), "gzip");
 			curl_setopt($rCurl, constant('CURLOPT_TIMEOUT'), 30);
+			curl_setopt($rCurl, constant('CURLOPT_HTTPHEADER'), array("Cache-Control: no-cache", "Pragma: no-cache"));
 			if ($sPostData) {
 				curl_setopt($rCurl, constant('CURLOPT_POST'), true);
 				curl_setopt($rCurl, constant('CURLOPT_POSTFIELDS'), $sPostData);
