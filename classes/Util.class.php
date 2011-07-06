@@ -86,7 +86,6 @@
 			curl_setopt($rCurl, constant('CURLOPT_FOLLOWLOCATION'), true);
 			curl_setopt($rCurl, constant('CURLOPT_SSL_VERIFYPEER'), false);
 			curl_setopt($rCurl, constant('CURLOPT_SSL_VERIFYHOST'), false);
-			curl_setopt($rCurl, constant('CURLOPT_USERAGENT'), 'Mozilla/5.0');
 			curl_setopt($rCurl, constant('CURLOPT_NOBODY'), true);
 			curl_setopt($rCurl, constant('CURLOPT_HEADER'), true);
 			

@@ -99,7 +99,7 @@
 				$sAuthor = $objSimpleDom -> find('a.SubmitterClick', 0) -> title;
 				
 				$arrMatches = array ();
-				if (preg_match('/Updated: ([-a-zA-Z0-9]+)/', $sHtml, $arrMatches)) {
+				if (preg_match('/Updated: ([-a-zA-Z0-9 ]+)/', $sHtml, $arrMatches)) {
 					$sPubDate = date('r', strtotime($arrMatches[1]));
 				}
 				
@@ -107,12 +107,12 @@
 				preg_match('/name="flashvars" value="([^"]+)"/', $sHtml, $arrMatches);
 				$arrFlashVars = array ();
 				parse_str($arrMatches[1], $arrFlashVars);
-				if (!isset($arrFlashVars['mediaData'])) // This episode may be a adult video
+				if (!isset($arrFlashVars['mediaData']) || empty($arrFlashVars['mediaData'])) // This episode may be a adult video
 					continue;
 				$arrMediaData = json_decode($arrFlashVars['mediaData'], TRUE);
 				if (empty($arrMediaData)) {
 					Util :: log ('mediaData does not exist', MODE_WARNING);
-					return;
+					continue;
 				}
 				$sVideoLink = $arrMediaData['MP4']['mediaURL'] . "?__gda__=" . $arrMediaData['MP4']['key'];
 				if (empty($sVideoLink)) {
