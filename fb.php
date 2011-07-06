@@ -15,7 +15,11 @@
 	else if (empty ($objFBProfile))
 		die ("Decoding error!");
 	
-	$sUrl = $sUrl . "/feed";
+	
+	$token = file_get_contents('https://graph.facebook.com/oauth/access_token?type=client_cred&client_id=127989843879617&client_secret=51b8ed889ba2aa0534285a4078fbe5c5');
+	//die($token);
+	
+	$sUrl = str_replace("http", "https", $sUrl) . "/feed?" . $token;;
 	$mFBFeed = json_decode(Util :: sendHttpRequest($sUrl));
 	//print_r($mFBFeed);
 	if (isset ($mFBFeed -> error))
