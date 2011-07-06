@@ -47,6 +47,7 @@
 			$objXmlChannel -> addChild('description', $objSimpleDom -> find('meta[name=description]', 0) -> content);
 			$objXmlChannel -> addChild('generator', '9x9 Podcast Crawler (Alpha)');
 			$objXmlChannel -> addChild('language', 'zh-TW');
+			$objXmlChannel -> addChild('pubDate', date('r'));
 			$objXmlChannel -> addChild('copyright', '© 2008 Next Media Interactive Limited. All rights reversed.');
 			$objXmlChannel -> addChild('webMaster', 'web@appledaily.com.tw (蘋果日報)');
 			$objXmlImage = $objXmlChannel -> addChild('image');
@@ -54,16 +55,11 @@
 			$objXmlImage -> addChild('title', $objXmlChannel -> title);
 			$objXmlImage -> addChild('link', $objXmlChannel -> link);
 			
-			$sUrl = self :: BASE_URL . '/animation/amnajax' /* . '/menusecid/1/ordertp/day' */ . '/video_issueid/' . date('Ymd') . '/pages/1/pagee';
-			$objSimpleXml = simplexml_load_string(Util :: sendHttpRequest($sUrl));
-			$iTotal = (String)$objSimpleXml -> total;
-			if (empty($iTotal) || $iTotal == "0")
-				throw new Exception('can not fetch total number of items');
-			Util :: log("found total: " . $objSimpleXml -> total);
-			$sUrl = self :: BASE_URL . '/animation/amnajax/video_issueid/' . date('Ymd') . '/pages/1/pagee/' . $iTotal;
-			$objSimpleXml = simplexml_load_string(Util :: sendHttpRequest($sUrl));
+			$sUrl = self :: BASE_URL . '/animation';
+			$objSimpleDom = str_get_html(Util :: sendHttpRequest($sUrl));
 			
-			$arrXmlImgdata = $objSimpleXml -> xpath('/data/imgdata');
+			$arrDomFigure = $objSimpleDom -> find('figure');
+			
 			$iSkipped = 0;
 			$iNewAdded = 0;
 			$arrXmlItems = array ();
@@ -79,27 +75,16 @@
 					}
 				}
 			}
-			for ($i = 0 ; $i < count($arrXmlImgdata); $i++) {
+			for ($i = 0; $i < count($arrDomFigure); $i++) {
 				
-				if (empty($arrXmlImgdata[$i] -> artlink))
-					throw new Exception('artlink is empty!');
-				
-				$sEpisodePageLink = self :: BASE_URL . $arrXmlImgdata[$i] -> artlink;
-				$sTitle = (String)$arrXmlImgdata[$i] -> title;
-				
-				$objSimpleDom = str_get_html(Util :: sendHttpRequest($sEpisodePageLink));
-				$sIframeUrl = @$objSimpleDom -> find('iframe#videoplayerframe', 0) -> src;
-				if (empty($sIframeUrl))
-					throw new Exception("missing iframe url! ($sTitle)");
-				$sIframeUrl = self :: BASE_URL . $sIframeUrl;
-				
-				$objSimpleDomIframe = str_get_html(Util :: sendHttpRequest($sIframeUrl));
-				$sEpisodePageLink = @$objSimpleDomIframe -> find('h1 > a', 0) -> href;
-				if (empty($sEpisodePageLink)) {
-					Util :: log("missing sEpisodePageLink! ($sTitle)", MODE_WARNING);
+				$objDomLink = $arrDomFigure[$i] -> find('a', 0);
+				$objDomTitle = $arrDomFigure[$i] -> find('h2', 0);
+				if (!isset($objDomLink -> href)) {
 					continue;
 				}
-				$sEpisodePageLink = self :: BASE_URL . $sEpisodePageLink;
+				
+				$sEpisodePageLink = self :: BASE_URL . $objDomLink -> href;
+				$sTitle = htmlspecialchars($objDomTitle -> plaintext);
 				
 				$objXmlItem = new SimpleXmlElement('<item/>');
 				
@@ -117,8 +102,6 @@
 				$objSimpleDom = str_get_html(Util :: sendHttpRequest($sEpisodePageLink));
 				$sDescription = @trim($objSimpleDom -> find('meta[name=description]', 0) -> content);
 				if (empty($sDescription)) {
-					//Util :: log("missing description! ($sTitle)", MODE_WARNING);
-					//continue;
 					$objXmlItem -> addChild('description', $sTitle);
 				}
 				else
@@ -136,8 +119,7 @@
 				$objXmlEnclosure = $objXmlItem -> addChild('enclosure');
 				$objXmlEnclosure -> addAttribute('url', $arrMatches[1]);
 				$objXmlEnclosure -> addAttribute('length', Util :: getRemoteFileSize($arrMatches[1]));
-				$objXmlEnclosure -> addAttribute('type', 'video/x-flv');
-				//$objXmlItem -> addChild('duration', Util :: getVideoDuration($arrMatches[1]));
+				$objXmlEnclosure -> addAttribute('type', 'video/mp4');
 				
 				$objXmlItem -> addChild('pubDate', date('r', strtotime($objSimpleDom -> find('time.time_stamp', 0) -> plaintext)));
 				$objXmlItem -> addChild('link', $sEpisodePageLink);
