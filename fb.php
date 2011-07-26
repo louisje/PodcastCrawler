@@ -28,8 +28,10 @@
 		die ("Decoding error!");
 	
 	$arrFBVideos = array();
+	//print_r($mFBFeed -> data); die();
 	foreach ($mFBFeed -> data as $objFBPost) {
-		if (isset($objFBPost -> source) && strpos($objFBPost -> source, '.mp4') != FALSE)
+		//if (isset($objFBPost -> source) && strpos($objFBPost -> source, '.mp4') != FALSE)
+		if (isset($objFBPost -> type) && $objFBPost -> type == 'video')
 			$arrFBVideos[] = $objFBPost;
 	}
 	//print_r($arrFBVideos);
@@ -37,9 +39,9 @@
 	$objXmlRss = new SimpleXmlElement('<?xml version="1.0" encoding="utf-8"?><rss version="2.0" />');
 	$objXmlChannel = $objXmlRss -> addChild('channel');
 	
-	$objXmlChannel -> addChild('title', $objFBProfile -> name);
+	$objXmlChannel -> addChild('title', htmlspecialchars($objFBProfile -> name));
 	if (isset($objFBProfile -> link))
-		$objXmlChannel -> addChild('link', $objFBProfile -> link);
+		$objXmlChannel -> addChild('link', htmlspecialchars($objFBProfile -> link));
 	if (isset($objFBProfile -> picture)) {
 		$objXmlImage = $objXmlChannel -> addChild('image');
 		$objXmlImage -> addChild('url', $objFBProfile -> picture);
@@ -49,19 +51,31 @@
 	//$arrXmlItems = array();
 	foreach ($arrFBVideos as $objFBVideo) {
 		$objXmlItem = $objXmlChannel -> addChild('item');
-		$objXmlItem -> addChild('title', $objFBVideo -> name);
-		if (isset ($objFBVideo -> message))
+		$objXmlItem -> addChild('title', htmlspecialchars($objFBVideo -> name));
+		
+		if (isset ($objFBVideo -> description))
+			$objXmlItem -> addChild('description', htmlspecialchars($objFBVideo -> description));
+		else if (isset ($objFBVideo -> message))
 			$objXmlItem -> addChild('description', htmlspecialchars($objFBVideo -> message));
 		
-		$objXmlEnclosure = $objXmlItem -> addChild('enclosure');
-		$objXmlEnclosure -> addAttribute('url', $objFBVideo -> source);
-		$objXmlEnclosure -> addAttribute('length', Util :: getRemoteFileSize($objFBVideo -> source));
-		$objXmlEnclosure -> addAttribute('type', 'video/mp4');
-		$objXmlItem -> addChild('duration', $objFBVideo -> properties[0] -> text);
+		if (isset($objFBVideo -> source) && strpos($objFBVideo -> source, '.mp4') != FALSE) {
+			$objXmlEnclosure = $objXmlItem -> addChild('enclosure');
+			$objXmlEnclosure -> addAttribute('url', $objFBVideo -> source);
+			$objXmlEnclosure -> addAttribute('length', Util :: getRemoteFileSize($objFBVideo -> source));
+			$objXmlEnclosure -> addAttribute('type', 'video/mp4');
+			$objXmlItem -> addChild('duration', $objFBVideo -> properties[0] -> text);
+		}
 		
 		$objXmlItem -> addChild('pubDate', date('r', strtotime($objFBVideo -> created_time)));
 		$objXmlItem -> addChild('link', htmlspecialchars($objFBVideo -> link));
 		$objXmlItem -> addChild('guid', $objFBVideo -> object_id);
+		
+		if (isset($objFBVideo -> picture)) {
+			$objXmlImage = $objXmlItem -> addChild('image');
+			$objXmlImage -> addChild('url', $objFBVideo -> picture);
+			$objXmlImage -> addChild('title', $objXmlItem -> title);
+			$objXmlImage -> addChild('link', $objXmlItem -> link);
+		}
 	}
 	echo $objXmlRss -> asXML();
 	
