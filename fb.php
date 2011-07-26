@@ -72,9 +72,9 @@
 		
 		if (isset($objFBVideo -> picture)) {
 			$objXmlImage = $objXmlItem -> addChild('image');
-			$objXmlImage -> addChild('url', $objFBVideo -> picture);
-			$objXmlImage -> addChild('title', $objXmlItem -> title);
-			$objXmlImage -> addChild('link', $objXmlItem -> link);
+			$objXmlImage -> addChild('url', htmlspecialchars($objFBVideo -> picture));
+			$objXmlImage -> addChild('title', htmlspecialchars($objXmlItem -> title));
+			$objXmlImage -> addChild('link', htmlspecialchars($objXmlItem -> link));
 		}
 	}
 	echo $objXmlRss -> asXML();
