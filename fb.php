@@ -31,7 +31,9 @@
 	//print_r($mFBFeed -> data); die();
 	foreach ($mFBFeed -> data as $objFBPost) {
 		//if (isset($objFBPost -> source) && strpos($objFBPost -> source, '.mp4') != FALSE)
-		if (isset($objFBPost -> type) && $objFBPost -> type == 'video')
+		if (isset($objFBPost -> type) && ($objFBPost -> type == 'video' ||
+		                                  $objFBPost -> type == 'link'  ||
+		                                  $objFBPost -> type == 'photo'))
 			$arrFBVideos[] = $objFBPost;
 	}
 	//print_r($arrFBVideos);
