@@ -100,7 +100,9 @@
 			self :: $arrHttpHeader = $arrHeader;
 			if (isset($arrHeader['Content-Length'])) {
 				$iRedirections = 0;
-				return $arrHeader['Content-Length'];
+				$iContentLength = $arrHeader['Content-Length'];
+				self :: log("Content-Length: $iContentLength", MDOE_DEBUG);
+				return $iContentLength;
 			}
 			else if (isset($arrHeader['Location'])) {
 				$iRedirections += 1;
@@ -115,7 +117,7 @@
 				}
 			}
 			else {
-				self :: log("No content-length.", MODE_WARNING);
+				self :: log("No content-length. ($sUrl)", MODE_WARNING);
 				$iRedirections = 0;
 				return 0;
 			}
@@ -207,8 +209,10 @@
 			$sLogInfo .= sprintf("%16s,%8s, [%5s] %s\n", $sFunction, $sMode, $sMyPid, $sMessage);
 			
 			if (!file_exists($sLogFile)) {
-				if (touch($sLogFile) === FALSE || chmod($sLogFile, 0644) === FALSE)
+				if (touch($sLogFile) === FALSE || chmod($sLogFile, 0666) === FALSE)
 					throw new Exception("Can not create log file!");
+			} else if (!is_writable($sLogFile)) {
+				throw new Exception("Can not write log file!");
 			}
 			if ($cfgLogType == 2)
 				fprintf(STDERR, $sLogInfo);

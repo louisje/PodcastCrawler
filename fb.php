@@ -8,6 +8,7 @@
 		die ("Missing parameters!");
 	
 	$sUrl = constant('FB_GRAPH_API_URL') . $_REQUEST['id'];
+	Util :: log("fb: $sUrl", MDOE_DEBUG);
 	$objFBProfile = json_decode(Util :: sendHttpRequest($sUrl));
 	//print_r($objFBProfile);
 	if (isset ($objFBProfile -> error))
@@ -50,15 +51,19 @@
 		$objXmlImage -> addChild('title', $objXmlChannel -> title);
 		$objXmlImage -> addChild('link', $objXmlChannel -> link);
 	}
-	//$arrXmlItems = array();
 	foreach ($arrFBVideos as $objFBVideo) {
 		$objXmlItem = $objXmlChannel -> addChild('item');
 		$objXmlItem -> addChild('title', htmlspecialchars($objFBVideo -> name));
 		
-		if (isset ($objFBVideo -> description))
-			$objXmlItem -> addChild('description', htmlspecialchars($objFBVideo -> description));
-		else if (isset ($objFBVideo -> message))
-			$objXmlItem -> addChild('description', htmlspecialchars($objFBVideo -> message));
+		if (isset ($objFBVideo -> description)) {
+			$sDescription = $objFBVideo -> description;
+		} else if (isset ($objFBVideo -> message)) {
+			$sDescription = $objFBVideo -> message;
+		}
+		if (isset($objFBVideo -> picture)) {
+			$sDescription .= "<hr/><img src=\"" . htmlspecialchars($objFBVideo -> picture) . "\" alt=\"attachment\">";
+		}
+		$objXmlItem -> addChild('description', htmlspecialchars($sDescription));
 		
 		if (isset($objFBVideo -> source) && strpos($objFBVideo -> source, '.mp4') != FALSE) {
 			$objXmlEnclosure = $objXmlItem -> addChild('enclosure');
@@ -72,12 +77,10 @@
 		$objXmlItem -> addChild('link', htmlspecialchars($objFBVideo -> link));
 		$objXmlItem -> addChild('guid', $objFBVideo -> object_id);
 		
-		if (isset($objFBVideo -> picture)) {
-			$objXmlImage = $objXmlItem -> addChild('image');
-			$objXmlImage -> addChild('url', htmlspecialchars($objFBVideo -> picture));
-			$objXmlImage -> addChild('title', htmlspecialchars($objXmlItem -> title));
-			$objXmlImage -> addChild('link', htmlspecialchars($objXmlItem -> link));
-		}
 	}
-	echo $objXmlRss -> asXML();
+	$doc = new DOMDocument('1.0', 'UTF-8');
+	$doc -> preserveWhiteSpace = false;
+	$doc -> loadXML($objXmlRss -> asXML());
+	$doc -> formatOutput = true;
+	echo $doc->saveXML();
 	
