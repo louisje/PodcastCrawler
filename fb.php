@@ -82,5 +82,6 @@
 	$doc -> preserveWhiteSpace = false;
 	$doc -> loadXML($objXmlRss -> asXML());
 	$doc -> formatOutput = true;
+	header('Content-Type: text/xml');
 	echo $doc->saveXML();
 	
